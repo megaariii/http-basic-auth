@@ -1,19 +1,32 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
 
-const USERNAME = "username"
-const PASSWORD = "password"
+	"github.com/ilyakaznacheev/cleanenv"
+)
+
+type ConfigUser struct {
+    Username	string `env:"USERNAME"`
+    Password 	string `env:"PASSWORD"`
+}
+
+var cfg ConfigUser
 
 func Auth(w http.ResponseWriter, r *http.Request) bool {
+	_ = cleanenv.ReadConfig(".env", &cfg)
 	username, password, ok := r.BasicAuth()
 	if !ok {
-		w.Write([]byte(`Something wrong`))
+		fmt.Println(`Something wrong`)
+		w.WriteHeader(401)
+		return false
 	}
 
-	isValid := (username == USERNAME) && (password == PASSWORD)
+	isValid := (username == cfg.Username) && (password == cfg.Password)
 	if !isValid {
-		w.Write([]byte(`wrong username/password`))
+		fmt.Println(`wrong username/password`)
+		w.WriteHeader(401)
 		return false
 	}
 	return true
@@ -21,7 +34,8 @@ func Auth(w http.ResponseWriter, r *http.Request) bool {
 
 func AllowOnlyGET(w http.ResponseWriter, r *http.Request) bool  {
 	if r.Method != "GET" {
-		w.Write([]byte("Only GET is Allowed"))
+		fmt.Println("Only GET is Allowed")
+		w.WriteHeader(400)
 		return false
 	}
 	return true
