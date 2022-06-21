@@ -40,7 +40,7 @@ func ActionStudent(w http.ResponseWriter, r *http.Request)  {
 }
 
 func OutputJSON(w http.ResponseWriter, o interface{}) {
-	res, err := json.Marshal(0)
+	res, err := json.Marshal(o)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
